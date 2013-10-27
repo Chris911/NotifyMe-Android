@@ -16,6 +16,7 @@
 
 package com.NotifyMe;
 
+import android.app.Notification;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import android.app.IntentService;
@@ -79,7 +80,7 @@ public class GcmIntentService extends IntentService {
                 Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
                 // Post notification of received message.
                 // sendNotification("Received: " + extras.toString());
-                String message = (String) extras.get("message");
+                String message = (String) extras.get("body");
                 sendNotification(message);
                 Log.i(TAG, "Received: " + extras.toString());
             }
@@ -104,7 +105,9 @@ public class GcmIntentService extends IntentService {
                         .setContentTitle("NotifyMe")
                         .setStyle(new NotificationCompat.BigTextStyle()
                                 .bigText(msg))
-                        .setContentText(msg);
+                        .setContentText(msg)
+                        .setDefaults(Notification.DEFAULT_VIBRATE)
+                        .setOnlyAlertOnce(true);
 
         mBuilder.setContentIntent(contentIntent);
         mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
