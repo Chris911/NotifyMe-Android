@@ -26,10 +26,9 @@ public class MainActivity extends Activity {
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
 
     /**
-     * Substitute you own sender ID here. This is the project number you got
-     * from the API Console, as described in "Getting Started."
+     * Google Project ID for API access to GCM
      */
-    String SENDER_ID = "Your-Sender-ID";
+    String SENDER_ID = "339572350083";
 
     /**
      * Tag used on log messages.
@@ -37,6 +36,7 @@ public class MainActivity extends Activity {
     static final String TAG = "NotifyMe GCM";
 
     TextView mDisplay;
+    TextView mRegId;
     GoogleCloudMessaging gcm;
     AtomicInteger msgId = new AtomicInteger();
     Context context;
@@ -139,6 +139,36 @@ public class MainActivity extends Activity {
         }.execute(null, null, null);
     }
 
+    // Send an upstream message.
+    public void onClick(final View view) {
+
+        if (view == findViewById(R.id.send)) {
+            new AsyncTask<Void, Void, String>() {
+                @Override
+                protected String doInBackground(Void... params) {
+                    String msg = "";
+                    try {
+                        Bundle data = new Bundle();
+                        data.putString("my_message", "Hello World");
+                        data.putString("my_action", "com.google.android.gcm.demo.app.ECHO_NOW");
+                        String id = Integer.toString(msgId.incrementAndGet());
+                        gcm.send(SENDER_ID + "@gcm.googleapis.com", id, data);
+                        msg = "Sent message";
+                    } catch (IOException ex) {
+                        msg = "Error :" + ex.getMessage();
+                    }
+                    return msg;
+                }
+
+                @Override
+                protected void onPostExecute(String msg) {
+                    mDisplay.append(msg + "\n");
+                }
+            }.execute(null, null, null);
+        } else if (view == findViewById(R.id.clear)) {
+            mDisplay.setText("");
+        }
+    }
 
     /**
      * Gets the current registration ID for application on GCM service.
@@ -189,7 +219,7 @@ public class MainActivity extends Activity {
      */
     private SharedPreferences getGCMPreferences(Context context) {
         return getSharedPreferences(MainActivity.class.getSimpleName(),
-                context.MODE_PRIVATE);
+                Context.MODE_PRIVATE);
     }
 
     /**
