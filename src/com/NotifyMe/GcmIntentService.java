@@ -28,6 +28,8 @@ import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
+import java.util.ArrayList;
+
 /**
  * This {@code IntentService} does the actual handling of the GCM message.
  * {@code GcmBroadcastReceiver} (a {@code WakefulBroadcastReceiver}) holds a
@@ -76,7 +78,9 @@ public class GcmIntentService extends IntentService {
                 }
                 Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
                 // Post notification of received message.
-                sendNotification("Received: " + extras.toString());
+                // sendNotification("Received: " + extras.toString());
+                String message = (String) extras.get("message");
+                sendNotification(message);
                 Log.i(TAG, "Received: " + extras.toString());
             }
         }
@@ -97,7 +101,7 @@ public class GcmIntentService extends IntentService {
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.ic_stat_gcm)
-                        .setContentTitle("GCM Notification")
+                        .setContentTitle("NotifyMe")
                         .setStyle(new NotificationCompat.BigTextStyle()
                                 .bigText(msg))
                         .setContentText(msg);

@@ -1,5 +1,6 @@
 package com.NotifyMe;
 
+import android.widget.EditText;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -39,8 +40,7 @@ public class MainActivity extends Activity {
      */
     static final String TAG = "NotifyMe GCM";
 
-    TextView mDisplay;
-    TextView mRegId;
+    EditText mDisplay;
     GoogleCloudMessaging gcm;
     AtomicInteger msgId = new AtomicInteger();
     Context context;
@@ -55,7 +55,7 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.main);
-        mDisplay = (TextView) findViewById(R.id.display);
+        mDisplay = (EditText) findViewById(R.id.display);
 
         context = getApplicationContext();
 
@@ -123,7 +123,7 @@ public class MainActivity extends Activity {
                     msg = "Device registered, registration ID=" + regid;
 
                     // Send Reg ID to backend so we can use it later to send messages
-                    sendRegistrationIdToBackend();
+                    // sendRegistrationIdToBackend();
 
                     // Persist the regID - no need to register again.
                     storeRegistrationId(context, regid);
@@ -167,6 +167,7 @@ public class MainActivity extends Activity {
                 @Override
                 protected void onPostExecute(String msg) {
                     mDisplay.append(msg + "\n");
+                    Log.i(TAG, "New regId: " + regid);
                 }
             }.execute(null, null, null);
         } else if (view == findViewById(R.id.clear)) {
