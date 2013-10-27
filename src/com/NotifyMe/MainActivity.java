@@ -16,6 +16,8 @@ import android.view.View;
 import android.widget.TextView;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -24,6 +26,8 @@ public class MainActivity extends Activity {
     public static final String PROPERTY_REG_ID = "registration_id";
     private static final String PROPERTY_APP_VERSION = "appVersion";
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+
+    private final static String NOTIFYME_API_URL = "";
 
     /**
      * Google Project ID for API access to GCM
@@ -243,6 +247,14 @@ public class MainActivity extends Activity {
      * using the 'from' address in the message.
      */
     private void sendRegistrationIdToBackend() {
-        // Your implementation here.
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("regId", regid);
+        params.put("username", "Chris");
+        params.put("device_type", "android");
+        try {
+            ServerUtilities.post(NOTIFYME_API_URL, params);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
