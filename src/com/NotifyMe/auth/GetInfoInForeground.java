@@ -16,8 +16,6 @@ package com.NotifyMe.auth;
  * limitations under the License.
  */
 
-import com.NotifyMe.MainActivity;
-
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.auth.GooglePlayServicesAvailabilityException;

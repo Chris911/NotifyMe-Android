@@ -92,8 +92,9 @@ public abstract class AbstractGetInfoTask extends AsyncTask<Void, Void, Void> {
         int sc = con.getResponseCode();
         if (sc == 200) {
             InputStream is = con.getInputStream();
-            String name = getFirstName(readResponse(is));
-            mActivity.show("Hello " + name + "!");
+            //String name = getFirstName(readResponse(is));
+            //mActivity.show("Hello " + name + "!");
+            mActivity.saveProfile(new JSONObject(readResponse(is)));
             is.close();
             return;
         } else if (sc == 401) {

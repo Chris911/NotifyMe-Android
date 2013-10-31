@@ -15,12 +15,15 @@ package com.NotifyMe.auth;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import com.NotifyMe.MainActivity;
 
 import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -28,15 +31,15 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.Spinner;
 import android.widget.TextView;
-import com.NotifyMe.MainActivity;
 import com.NotifyMe.R;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class SignInActivity extends Activity {
     private static final String TAG = "SignInActivity";
-    private static final String SCOPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile";
-    public static final String EXTRA_ACCOUNTNAME = "extra_accountname";
+    private static final String SCOPE = "oauth2:https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email";
 
     private AccountManager mAccountManager;
 
@@ -173,12 +176,22 @@ public class SignInActivity extends Activity {
         return new GetInfoInForeground(activity, email, scope, requestCode);
     }
 
-    private int getIndex(String[] array, String element) {
-        for (int i = 0; i < array.length; i++) {
-            if (element.equals(array[i])) {
-                return i;
-            }
-        }
-        return 0;  // default to first element.
+    /**
+     * @return Application's {@code SharedPreferences}.
+     */
+    private SharedPreferences getGCMPreferences() {
+        return getSharedPreferences(MainActivity.class.getSimpleName(), Context.MODE_PRIVATE);
+    }
+
+    public void saveProfile(JSONObject profile) throws JSONException {
+        final SharedPreferences prefs = getGCMPreferences();
+
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(MainActivity.PROPERTY_EMAIL, profile.getString("email"));
+        editor.putString(MainActivity.PROPERTY_FULLNAME, profile.getString("name"));
+        editor.putString(MainActivity.PROPERTY_GIVEN_NAME, profile.getString("given_name"));
+        editor.putString(MainActivity.PROPERTY_FAMILY_NAME, profile.getString("family_name"));
+        editor.putString(MainActivity.PROPERTY_GOOGLE_UID, profile.getString("id"));
+        editor.commit();
     }
 }

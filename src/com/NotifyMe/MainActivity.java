@@ -26,8 +26,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class MainActivity extends Activity {
-    public  static final String PROPERTY_REG_ID = "registration_id";
-    private static final String PROPERTY_APP_VERSION = "appVersion";
+    public static final String PROPERTY_REG_ID = "registration_id";
+    public static final String PROPERTY_APP_VERSION = "appVersion";
+    public static final String PROPERTY_GOOGLE_UID = "google_uid";
+    public static final String PROPERTY_FULLNAME = "fullname";
+    public static final String PROPERTY_EMAIL = "email";
+    public static final String PROPERTY_GIVEN_NAME = "given_name";
+    public static final String PROPERTY_FAMILY_NAME = "family_name";
+
     private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private static final int REQUEST_CODE_RECOVER_FROM_AUTH_ERROR = 1001;
     private static final int REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR = 1002;
@@ -66,16 +72,20 @@ public class MainActivity extends Activity {
     }
 
     private void registerDevice() {
-        // Check device for Play Services APK. If check succeeds, proceed with GCM registration.
-        if (checkPlayServices()) {
-            gcm = GoogleCloudMessaging.getInstance(this);
-            regId = getRegistrationId(context);
-
-            if (regId.isEmpty()) {
-                registerInBackground();
-            }
+        if(getUserGoogleUID().isEmpty()) {
+            mDisplay.append("You need to sign in first\n");
         } else {
-            Log.i(TAG, "No valid Google Play Services APK found.");
+            // Check device for Play Services APK. If check succeeds, proceed with GCM registration.
+            if (checkPlayServices()) {
+                gcm = GoogleCloudMessaging.getInstance(this);
+                regId = getRegistrationId(context);
+
+                if (regId.isEmpty()) {
+                    registerInBackground();
+                }
+            } else {
+                Log.i(TAG, "No valid Google Play Services APK found.");
+            }
         }
     }
 
@@ -154,25 +164,34 @@ public class MainActivity extends Activity {
     public void onClick(final View view) {
 
         if (view == findViewById(R.id.sign_in_google)) {
-            // Sign in with Google
-            Intent intent = new Intent(this, SignInActivity.class);
-            startActivity(intent);
+            String fullname = getUserFullname();
+            if(fullname.isEmpty()) {
+                // Sign in with Google
+                Intent intent = new Intent(this, SignInActivity.class);
+                startActivity(intent);
+            } else {
+                mDisplay.append("Already signed in as " + fullname + "\n");
+            }
 
         } else if (view == findViewById(R.id.register)) {
-            new AsyncTask<Void, Void, String>() {
-                @Override
-                protected String doInBackground(Void... params) {
-                    registerDevice();
+            if(getUserGoogleUID().isEmpty()) {
+                mDisplay.append("You need to sign in first\n");
+            } else {
+                new AsyncTask<Void, Void, String>() {
+                    @Override
+                    protected String doInBackground(Void... params) {
+                        registerDevice();
+                        return "Registering device in background.";
+                    }
 
-                    return "Registering device in background.";
-                }
+                    @Override
+                    protected void onPostExecute(String msg) {
+                        mDisplay.append(msg + "\n");
+                        Log.i(TAG, "New regId: " + regId);
+                    }
+                }.execute(null, null, null);
+            }
 
-                @Override
-                protected void onPostExecute(String msg) {
-                    mDisplay.append(msg + "\n");
-                    Log.i(TAG, "New regId: " + regId);
-                }
-            }.execute(null, null, null);
         } else if (view == findViewById(R.id.clear)) {
             mDisplay.setText("");
         }
@@ -187,7 +206,7 @@ public class MainActivity extends Activity {
      *         registration ID.
      */
     private String getRegistrationId(Context context) {
-        final SharedPreferences prefs = getGCMPreferences(context);
+        final SharedPreferences prefs = getGCMPreferences();
         String registrationId = prefs.getString(PROPERTY_REG_ID, "");
         if (registrationId.isEmpty()) {
             Log.i(TAG, "Registration not found.");
@@ -205,6 +224,24 @@ public class MainActivity extends Activity {
         return registrationId;
     }
 
+    private String getUserFullname() {
+        final SharedPreferences prefs = getGCMPreferences();
+        String userFullname = prefs.getString(PROPERTY_FULLNAME, "");
+        if (userFullname.isEmpty()) {
+            return "";
+        }
+        return userFullname;
+    }
+
+    private String getUserGoogleUID() {
+        final SharedPreferences prefs = getGCMPreferences();
+        String uid = prefs.getString(PROPERTY_GOOGLE_UID, "");
+        if (uid.isEmpty()) {
+            return "";
+        }
+        return uid;
+    }
+
     /**
      * Stores the registration ID and app versionCode in the application's
      * {@code SharedPreferences}.
@@ -213,7 +250,7 @@ public class MainActivity extends Activity {
      * @param regId registration ID
      */
     private void storeRegistrationId(Context context, String regId) {
-        final SharedPreferences prefs = getGCMPreferences(context);
+        final SharedPreferences prefs = getGCMPreferences();
         int appVersion = getAppVersion(context);
         Log.i(TAG, "Saving regId on app version " + appVersion);
         SharedPreferences.Editor editor = prefs.edit();
@@ -225,7 +262,7 @@ public class MainActivity extends Activity {
     /**
      * @return Application's {@code SharedPreferences}.
      */
-    private SharedPreferences getGCMPreferences(Context context) {
+    private SharedPreferences getGCMPreferences() {
         return getSharedPreferences(MainActivity.class.getSimpleName(),
                 Context.MODE_PRIVATE);
     }
@@ -253,42 +290,12 @@ public class MainActivity extends Activity {
     private void sendRegistrationIdToBackend() {
         Map<String, String> params = new HashMap<String, String>();
         params.put("regId", regId);
-        params.put("uid", "104002621339137927376");
+        params.put("uid", getUserGoogleUID());
         params.put("device_type", "android");
         try {
             ServerUtilities.post(NOTIFYME_API_URL+DEVICE_ENDPOINT, params);
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * This method is a hook for background threads and async tasks that need to update the UI.
-     * It does this by launching a runnable under the UI thread.
-     */
-    public void show(final String message) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mDisplay.setText(message);
-            }
-        });
-    }
-
-    /**
-     * This method is a hook for background threads and async tasks that need to launch a dialog.
-     * It does this by launching a runnable under the UI thread.
-     */
-    public void showErrorDialog(final int code) {
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                Dialog d = GooglePlayServicesUtil.getErrorDialog(
-                        code,
-                        MainActivity.this,
-                        REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR);
-                d.show();
-            }
-        });
     }
 }
