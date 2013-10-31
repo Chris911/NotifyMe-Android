@@ -1,5 +1,6 @@
 package com.NotifyMe;
 
+import android.app.Dialog;
 import android.widget.EditText;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
@@ -23,12 +24,14 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 
 public class MainActivity extends Activity {
-    public static final String EXTRA_MESSAGE = "message";
-    public static final String PROPERTY_REG_ID = "registration_id";
+    public  static final String PROPERTY_REG_ID = "registration_id";
     private static final String PROPERTY_APP_VERSION = "appVersion";
-    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+    private static final int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
+    private static final int REQUEST_CODE_RECOVER_FROM_AUTH_ERROR = 1001;
+    private static final int REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR = 1002;
 
-    private final static String NOTIFYME_API_URL = "";
+    private final static String NOTIFYME_API_URL = "http://notifyme.cloudapp.net/api/";
+    private final static String DEVICE_ENDPOINT  = "device/register";
 
     /**
      * Google Project ID for API access to GCM
@@ -40,12 +43,12 @@ public class MainActivity extends Activity {
      */
     static final String TAG = "NotifyMe GCM";
 
-    EditText mDisplay;
+    TextView mDisplay;
     GoogleCloudMessaging gcm;
     AtomicInteger msgId = new AtomicInteger();
     Context context;
 
-    String regid;
+    String regId;
 
     /**
      * Called when the activity is first created.
@@ -62,9 +65,9 @@ public class MainActivity extends Activity {
         // Check device for Play Services APK. If check succeeds, proceed with GCM registration.
         if (checkPlayServices()) {
             gcm = GoogleCloudMessaging.getInstance(this);
-            regid = getRegistrationId(context);
+            regId = getRegistrationId(context);
 
-            if (regid.isEmpty()) {
+            if (regId.isEmpty()) {
                 registerInBackground();
             }
         } else {
@@ -119,14 +122,14 @@ public class MainActivity extends Activity {
                     if (gcm == null) {
                         gcm = GoogleCloudMessaging.getInstance(context);
                     }
-                    regid = gcm.register(SENDER_ID);
-                    msg = "Device registered, registration ID=" + regid;
+                    regId = gcm.register(SENDER_ID);
+                    msg = "Device registered, registration ID=" + regId;
 
                     // Send Reg ID to backend so we can use it later to send messages
-                    // sendRegistrationIdToBackend();
+                    sendRegistrationIdToBackend();
 
                     // Persist the regID - no need to register again.
-                    storeRegistrationId(context, regid);
+                    storeRegistrationId(context, regId);
                 } catch (IOException ex) {
                     msg = "Error :" + ex.getMessage();
                     // If there is an error, don't just keep trying to register.
@@ -167,7 +170,7 @@ public class MainActivity extends Activity {
                 @Override
                 protected void onPostExecute(String msg) {
                     mDisplay.append(msg + "\n");
-                    Log.i(TAG, "New regId: " + regid);
+                    Log.i(TAG, "New regId: " + regId);
                 }
             }.execute(null, null, null);
         } else if (view == findViewById(R.id.clear)) {
@@ -249,13 +252,43 @@ public class MainActivity extends Activity {
      */
     private void sendRegistrationIdToBackend() {
         Map<String, String> params = new HashMap<String, String>();
-        params.put("regId", regid);
-        params.put("username", "Chris");
+        params.put("regId", regId);
+        params.put("uid", "104002621339137927376");
         params.put("device_type", "android");
         try {
-            ServerUtilities.post(NOTIFYME_API_URL, params);
+            ServerUtilities.post(NOTIFYME_API_URL+DEVICE_ENDPOINT, params);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    /**
+     * This method is a hook for background threads and async tasks that need to update the UI.
+     * It does this by launching a runnable under the UI thread.
+     */
+    public void show(final String message) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mDisplay.setText(message);
+            }
+        });
+    }
+
+    /**
+     * This method is a hook for background threads and async tasks that need to launch a dialog.
+     * It does this by launching a runnable under the UI thread.
+     */
+    public void showErrorDialog(final int code) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Dialog d = GooglePlayServicesUtil.getErrorDialog(
+                        code,
+                        MainActivity.this,
+                        REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR);
+                d.show();
+            }
+        });
     }
 }
