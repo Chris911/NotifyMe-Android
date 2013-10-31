@@ -31,7 +31,7 @@ import java.io.IOException;
  */
 public class GetInfoInForeground extends AbstractGetInfoTask {
 
-    public GetInfoInForeground(MainActivity activity, String email, String scope, int requestCode) {
+    public GetInfoInForeground(SignInActivity activity, String email, String scope, int requestCode) {
         super(activity, email, scope, requestCode);
     }
 

@@ -1,7 +1,9 @@
 package com.NotifyMe;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.widget.EditText;
+import com.NotifyMe.auth.SignInActivity;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -58,10 +60,12 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.main);
-        mDisplay = (EditText) findViewById(R.id.display);
+        mDisplay = (TextView) findViewById(R.id.display);
 
         context = getApplicationContext();
+    }
 
+    private void registerDevice() {
         // Check device for Play Services APK. If check succeeds, proceed with GCM registration.
         if (checkPlayServices()) {
             gcm = GoogleCloudMessaging.getInstance(this);
@@ -149,22 +153,18 @@ public class MainActivity extends Activity {
     // Send an upstream message.
     public void onClick(final View view) {
 
-        if (view == findViewById(R.id.send)) {
+        if (view == findViewById(R.id.sign_in_google)) {
+            // Sign in with Google
+            Intent intent = new Intent(this, SignInActivity.class);
+            startActivity(intent);
+
+        } else if (view == findViewById(R.id.register)) {
             new AsyncTask<Void, Void, String>() {
                 @Override
                 protected String doInBackground(Void... params) {
-                    String msg = "";
-                    try {
-                        Bundle data = new Bundle();
-                        data.putString("my_message", "Hello World");
-                        data.putString("my_action", "com.google.android.gcm.demo.app.ECHO_NOW");
-                        String id = Integer.toString(msgId.incrementAndGet());
-                        gcm.send(SENDER_ID + "@gcm.googleapis.com", id, data);
-                        msg = "Sent message";
-                    } catch (IOException ex) {
-                        msg = "Error :" + ex.getMessage();
-                    }
-                    return msg;
+                    registerDevice();
+
+                    return "Registering device in background.";
                 }
 
                 @Override

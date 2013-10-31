@@ -2,5 +2,10 @@
 <resources>
     <string name="app_name">NotifyMe</string>
     <string name="send">Send</string>
+    <string name="register">Register</string>
     <string name="clear">Clear</string>
+    <string name="sign_in_google">Sign in with Google</string>
+
+    <string name="sign_in">Sign In</string>
+    <string name="account">Account</string>
 </resources>

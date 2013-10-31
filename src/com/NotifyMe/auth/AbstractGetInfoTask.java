@@ -36,13 +36,13 @@ import java.net.URL;
 public abstract class AbstractGetInfoTask extends AsyncTask<Void, Void, Void> {
     private static final String TAG = "TokenInfoTask";
     private static final String NAME_KEY = "given_name";
-    protected MainActivity mActivity;
+    protected SignInActivity mActivity;
 
     protected String mScope;
     protected String mEmail;
     protected int mRequestCode;
 
-    AbstractGetInfoTask(MainActivity activity, String email, String scope, int requestCode) {
+    AbstractGetInfoTask(SignInActivity activity, String email, String scope, int requestCode) {
         this.mActivity = activity;
         this.mScope = scope;
         this.mEmail = email;

@@ -13,11 +13,18 @@
                 >
 
             <Button
-                    android:id="@+id/send"
+                    android:id="@+id/sign_in_google"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:onClick="onClick"
-                    android:text="@string/send" />
+                    android:text="@string/sign_in_google" />
+
+            <Button
+                    android:id="@+id/register"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:onClick="onClick"
+                    android:text="@string/register" />
 
             <Button
                     android:id="@+id/clear"
