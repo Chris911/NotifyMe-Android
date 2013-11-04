@@ -1,15 +1,8 @@
 package com.NotifyMe;
 
-import android.app.Dialog;
-import android.content.Intent;
-import android.widget.EditText;
-import com.NotifyMe.auth.SignInActivity;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.gcm.GoogleCloudMessaging;
-
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
@@ -18,10 +11,17 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
+import com.NotifyMe.Utilities.APIResponse;
+import com.NotifyMe.Utilities.ServerUtilities;
+import com.NotifyMe.auth.SignInActivity;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+import org.apache.http.message.BasicNameValuePair;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 
@@ -73,9 +73,18 @@ public class MainActivity extends Activity {
         context = getApplicationContext();
     }
 
+    public void show(final String message) {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                mDisplay.append(message + "\n");
+            }
+        });
+    }
+
     private void registerDevice() {
         if(getUserGoogleUID().isEmpty()) {
-            mDisplay.append("You need to sign in first\n");
+            show("You need to sign in first\n");
         } else {
             // Check device for Play Services APK. If check succeeds, proceed with GCM registration.
             if (checkPlayServices()) {
@@ -84,6 +93,8 @@ public class MainActivity extends Activity {
 
                 if (regId.isEmpty()) {
                     registerInBackground();
+                } else {
+                    show("This device is already registered\n");
                 }
             } else {
                 Log.i(TAG, "No valid Google Play Services APK found.");
@@ -157,7 +168,7 @@ public class MainActivity extends Activity {
 
             @Override
             protected void onPostExecute(String msg) {
-                mDisplay.append(msg + "\n");
+                show(msg + "\n");
             }
         }.execute(null, null, null);
     }
@@ -170,14 +181,14 @@ public class MainActivity extends Activity {
             if(fullname.isEmpty()) {
                 // Sign in with Google
                 Intent intent = new Intent(this, SignInActivity.class);
-                startActivityForResult(intent,1);
+                startActivityForResult(intent, 1);
             } else {
-                mDisplay.append("Already signed in as " + fullname + "\n");
+                show("Already signed in as " + fullname + "\n");
             }
 
         } else if (view == findViewById(R.id.register)) {
             if(getUserGoogleUID().isEmpty()) {
-                mDisplay.append("You need to sign in first\n");
+                show("You need to sign in first\n");
             } else {
                 new AsyncTask<Void, Void, String>() {
                     @Override
@@ -188,7 +199,7 @@ public class MainActivity extends Activity {
 
                     @Override
                     protected void onPostExecute(String msg) {
-                        mDisplay.append(msg + "\n");
+                        show(msg + "\n");
                         Log.i(TAG, "New regId: " + regId);
                     }
                 }.execute(null, null, null);
@@ -196,13 +207,17 @@ public class MainActivity extends Activity {
 
         } else if (view == findViewById(R.id.clear)) {
             mDisplay.setText("");
+        } else if (view == findViewById(R.id.clearData)) {
+            final SharedPreferences prefs = getGCMPreferences();
+            SharedPreferences.Editor editor = prefs.edit();
+            editor.clear().commit();
         }
     }
 
     protected void onActivityResult (int requestCode, int resultCode, Intent data) {
         // Collect data from the intent and use it
         if(resultCode == VALID_SIGN_IN_RESULT) {
-            mDisplay.append("Successfully signed in with Google\n");
+            show("Successfully signed in with Google\n");
         }
     }
 
@@ -297,14 +312,14 @@ public class MainActivity extends Activity {
      * using the 'from' address in the message.
      */
     private void sendRegistrationIdToBackend() {
-        Map<String, String> params = new HashMap<String, String>();
-        params.put("regId", regId);
-        params.put("uid", getUserGoogleUID());
-        params.put("device_type", "android");
-        try {
-            ServerUtilities.post(NOTIFYME_API_URL+DEVICE_ENDPOINT, params);
-        } catch (IOException e) {
-            e.printStackTrace();
+        List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
+        params.add(new BasicNameValuePair("regId", regId));
+        params.add(new BasicNameValuePair("uid", getUserGoogleUID()));
+        params.add(new BasicNameValuePair("device_type", "android"));
+
+        APIResponse response = ServerUtilities.post(NOTIFYME_API_URL + DEVICE_ENDPOINT, params);
+        if(!response.APISuccess) {
+            show("API Error: " + response.APIError +"\n");
         }
     }
 }

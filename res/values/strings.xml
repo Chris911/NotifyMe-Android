@@ -4,6 +4,7 @@
     <string name="send">Send</string>
     <string name="register">Register Device</string>
     <string name="clear">Clear</string>
+    <string name="clearData">Clear Data</string>
     <string name="sign_in_google">Sign in with Google</string>
 
     <string name="sign_in">Sign In</string>

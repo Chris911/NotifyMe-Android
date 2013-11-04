@@ -17,6 +17,7 @@
 package com.NotifyMe;
 
 import android.app.Notification;
+import android.net.Uri;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import android.app.IntentService;
@@ -28,6 +29,9 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 
@@ -80,8 +84,7 @@ public class GcmIntentService extends IntentService {
                 Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
                 // Post notification of received message.
                 // sendNotification("Received: " + extras.toString());
-                String message = (String) extras.get("message");
-                sendNotification(message);
+                sendNotificationWithExtras(extras);
                 Log.i(TAG, "Received: " + extras.toString());
             }
         }
@@ -89,9 +92,6 @@ public class GcmIntentService extends IntentService {
         GcmBroadcastReceiver.completeWakefulIntent(intent);
     }
 
-    // Put the message into a notification and post it.
-    // This is just one simple example of what you might choose to do with
-    // a GCM message.
     private void sendNotification(String msg) {
         mNotificationManager = (NotificationManager)
                 this.getSystemService(Context.NOTIFICATION_SERVICE);
@@ -103,9 +103,54 @@ public class GcmIntentService extends IntentService {
                 new NotificationCompat.Builder(this)
                         .setSmallIcon(R.drawable.ic_stat_gcm)
                         .setContentTitle("NotifyMe")
+                        .setAutoCancel(true)
                         .setStyle(new NotificationCompat.BigTextStyle()
                                 .bigText(msg))
                         .setContentText(msg)
+                        .setDefaults(Notification.DEFAULT_VIBRATE)
+                        .setOnlyAlertOnce(true);
+
+        mBuilder.setContentIntent(contentIntent);
+        mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+    }
+
+    private void sendNotificationWithExtras(Bundle extras) {
+        String message = extras.getString("message");
+        String type = extras.getString("service");
+        String title = "NotifyMe ["+ type +"]";
+
+        mNotificationManager = (NotificationManager)
+                this.getSystemService(Context.NOTIFICATION_SERVICE);
+
+        PendingIntent contentIntent;
+        if(type.equals("Reddit")) {
+            Intent resultIntent = new Intent(Intent.ACTION_VIEW);
+            String url;
+            if(Integer.parseInt(extras.getString("count")) == 1) {
+                try {
+                    JSONArray posts = new JSONArray(extras.getString("links"));
+                    url = posts.getJSONObject(0).getString("url");
+                    message = posts.getJSONObject(0).getString("title");
+                } catch (JSONException e) {
+                    url = "http://reddit.com";
+                }
+            } else {
+                url = "http://reddit.com";
+            }
+            resultIntent.setData(Uri.parse(url));
+            contentIntent = PendingIntent.getActivity(this, 0, resultIntent, Intent.FLAG_ACTIVITY_NEW_TASK);
+        } else {
+            contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
+        }
+
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.drawable.ic_stat_gcm)
+                        .setContentTitle(title)
+                        .setAutoCancel(true)
+                        .setStyle(new NotificationCompat.BigTextStyle()
+                                .bigText(message))
+                        .setContentText(message)
                         .setDefaults(Notification.DEFAULT_VIBRATE)
                         .setOnlyAlertOnce(true);
 
