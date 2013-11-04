@@ -96,6 +96,7 @@ public abstract class AbstractGetInfoTask extends AsyncTask<Void, Void, Void> {
             //mActivity.show("Hello " + name + "!");
             mActivity.saveProfile(new JSONObject(readResponse(is)));
             is.close();
+            mActivity.finishActivity();
             return;
         } else if (sc == 401) {
             GoogleAuthUtil.invalidateToken(mActivity, token);

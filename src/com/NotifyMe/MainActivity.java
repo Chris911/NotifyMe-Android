@@ -38,6 +38,8 @@ public class MainActivity extends Activity {
     private static final int REQUEST_CODE_RECOVER_FROM_AUTH_ERROR = 1001;
     private static final int REQUEST_CODE_RECOVER_FROM_PLAY_SERVICES_ERROR = 1002;
 
+    public static final int VALID_SIGN_IN_RESULT = 8000;
+
     private final static String NOTIFYME_API_URL = "http://notifyme.cloudapp.net/api/";
     private final static String DEVICE_ENDPOINT  = "device/register";
 
@@ -168,7 +170,7 @@ public class MainActivity extends Activity {
             if(fullname.isEmpty()) {
                 // Sign in with Google
                 Intent intent = new Intent(this, SignInActivity.class);
-                startActivity(intent);
+                startActivityForResult(intent,1);
             } else {
                 mDisplay.append("Already signed in as " + fullname + "\n");
             }
@@ -194,6 +196,13 @@ public class MainActivity extends Activity {
 
         } else if (view == findViewById(R.id.clear)) {
             mDisplay.setText("");
+        }
+    }
+
+    protected void onActivityResult (int requestCode, int resultCode, Intent data) {
+        // Collect data from the intent and use it
+        if(resultCode == VALID_SIGN_IN_RESULT) {
+            mDisplay.append("Successfully signed in with Google\n");
         }
     }
 

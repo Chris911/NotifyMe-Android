@@ -162,16 +162,11 @@ public class SignInActivity extends Activity {
                     return;
                 }
                 mEmail = mNamesArray[accountIndex];
-                getTask(SignInActivity.this, mEmail, SCOPE,
-                        REQUEST_CODE_RECOVER_FROM_AUTH_ERROR).execute();
+                getTask(SignInActivity.this, mEmail, SCOPE, REQUEST_CODE_RECOVER_FROM_AUTH_ERROR).execute();
             }
         });
     }
 
-    /**
-     * Note: This approach is for demo purposes only. Clients would normally not get tokens in the
-     * background from a Foreground activity.
-     */
     private AbstractGetInfoTask getTask(SignInActivity activity, String email, String scope, int requestCode) {
         return new GetInfoInForeground(activity, email, scope, requestCode);
     }
@@ -193,5 +188,10 @@ public class SignInActivity extends Activity {
         editor.putString(MainActivity.PROPERTY_FAMILY_NAME, profile.getString("family_name"));
         editor.putString(MainActivity.PROPERTY_GOOGLE_UID, profile.getString("id"));
         editor.commit();
+    }
+
+    public void finishActivity() {
+        setResult(MainActivity.VALID_SIGN_IN_RESULT);
+        finish();
     }
 }
