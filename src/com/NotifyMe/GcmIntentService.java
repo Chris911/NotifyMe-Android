@@ -82,9 +82,14 @@ public class GcmIntentService extends IntentService {
                     }
                 }
                 Log.i(TAG, "Completed work @ " + SystemClock.elapsedRealtime());
-                // Post notification of received message.
-                // sendNotification("Received: " + extras.toString());
-                sendNotificationWithExtras(extras);
+
+                String service = extras.getString("service");
+                if(service.equals("NotifyMe")) {
+                    sendNotification(extras.getString("message"));
+                } else if(service.equals("Reddit")) {
+                    sendNotificationWithExtras(extras);
+                }
+
                 Log.i(TAG, "Received: " + extras.toString());
             }
         }
