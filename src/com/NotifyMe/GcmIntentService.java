@@ -18,6 +18,8 @@ package com.NotifyMe;
 
 import android.app.Notification;
 import android.content.ComponentName;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
@@ -35,6 +37,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This {@code IntentService} does the actual handling of the GCM message.
@@ -147,9 +150,15 @@ public class GcmIntentService extends IntentService {
             resultIntent.setData(Uri.parse(url));
             contentIntent = PendingIntent.getActivity(this, 0, resultIntent, Intent.FLAG_ACTIVITY_NEW_TASK);
         } else if(type.equals("weather")) {
-            Intent resultIntent = new Intent(Intent.ACTION_VIEW);
-            String url = "http://weather.com/";
-            resultIntent.setData(Uri.parse(url));
+            Intent resultIntent;
+            Intent weatherIntent = getWeatherAppIntent();
+            if(weatherIntent != null) {
+                resultIntent = weatherIntent;
+            } else {
+                resultIntent = new Intent(Intent.ACTION_VIEW);
+                String url = "http://weather.com/";
+                resultIntent.setData(Uri.parse(url));
+            }
             contentIntent = PendingIntent.getActivity(this, 0, resultIntent, Intent.FLAG_ACTIVITY_NEW_TASK);
         } else {
             contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
@@ -168,5 +177,22 @@ public class GcmIntentService extends IntentService {
 
         mBuilder.setContentIntent(contentIntent);
         mNotificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+    }
+
+    private Intent getWeatherAppIntent() {
+        final PackageManager pm = getPackageManager();
+        //get a list of installed apps.
+        String genieWidgetPackage = null;
+        List<ApplicationInfo> packages = pm.getInstalledApplications(PackageManager.GET_META_DATA);
+        for(ApplicationInfo packageInfo : packages) {
+            if(packageInfo.packageName.toLowerCase().contains("weather")) {
+                return pm.getLaunchIntentForPackage(packageInfo.packageName);
+            } else if(packageInfo.packageName.toLowerCase().contains("geniewidget")) {
+                genieWidgetPackage = packageInfo.packageName;
+            }
+        }
+        // Didn't find a weather app - Try Google News and Weather
+        // Will return null if not found.
+        return pm.getLaunchIntentForPackage(genieWidgetPackage);
     }
 }
