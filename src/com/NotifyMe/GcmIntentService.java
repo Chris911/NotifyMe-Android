@@ -17,6 +17,7 @@
 package com.NotifyMe;
 
 import android.app.Notification;
+import android.content.ComponentName;
 import android.net.Uri;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
@@ -86,7 +87,8 @@ public class GcmIntentService extends IntentService {
                 String service = extras.getString("service");
                 if(service.equals("NotifyMe")) {
                     sendNotification(extras.getString("message"));
-                } else if(service.equals("Reddit")) {
+                } else if(service.equals("Reddit") ||
+                          service.equals("weather")) {
                     sendNotificationWithExtras(extras);
                 }
 
@@ -142,6 +144,11 @@ public class GcmIntentService extends IntentService {
             } else {
                 url = "http://reddit.com";
             }
+            resultIntent.setData(Uri.parse(url));
+            contentIntent = PendingIntent.getActivity(this, 0, resultIntent, Intent.FLAG_ACTIVITY_NEW_TASK);
+        } else if(type.equals("weather")) {
+            Intent resultIntent = new Intent(Intent.ACTION_VIEW);
+            String url = "http://weather.com/";
             resultIntent.setData(Uri.parse(url));
             contentIntent = PendingIntent.getActivity(this, 0, resultIntent, Intent.FLAG_ACTIVITY_NEW_TASK);
         } else {
