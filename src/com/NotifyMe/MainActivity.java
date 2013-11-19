@@ -316,6 +316,7 @@ public class MainActivity extends Activity {
         params.add(new BasicNameValuePair("regId", regId));
         params.add(new BasicNameValuePair("uid", getUserGoogleUID()));
         params.add(new BasicNameValuePair("device_type", "android"));
+        params.add(new BasicNameValuePair("device_name", android.os.Build.MODEL));
 
         APIResponse response = ServerUtilities.post(NOTIFYME_API_URL + DEVICE_ENDPOINT, params);
         if(!response.APISuccess) {
