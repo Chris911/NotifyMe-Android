@@ -80,7 +80,8 @@ public class GcmIntentService extends IntentService {
                 if(service.equals("NotifyMe")) {
                     sendNotification(extras.getString("message"));
                 } else if(service.equals("Reddit") ||
-                          service.equals("weather")) {
+                          service.equals("weather")||
+                          service.equals("poly")) {
                     sendNotificationWithExtras(extras);
                 }
 
@@ -148,6 +149,11 @@ public class GcmIntentService extends IntentService {
                 String url = "http://weather.com/";
                 resultIntent.setData(Uri.parse(url));
             }
+            contentIntent = PendingIntent.getActivity(this, 0, resultIntent, Intent.FLAG_ACTIVITY_NEW_TASK);
+        } else if(type.equals("poly")) {
+            Intent resultIntent = new Intent(Intent.ACTION_VIEW);
+            String url = "https://www4.polymtl.ca/poly/poly.html";
+            resultIntent.setData(Uri.parse(url));
             contentIntent = PendingIntent.getActivity(this, 0, resultIntent, Intent.FLAG_ACTIVITY_NEW_TASK);
         } else {
             contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
