@@ -116,30 +116,35 @@ public class GcmIntentService extends IntentService {
 
     private void sendNotificationWithExtras(Bundle extras) {
         String message = extras.getString("message");
-        String type = extras.getString("service");
-        String title = "NotifyMe ["+ type +"]";
+        String service = extras.getString("service");
+        String type = extras.getString("type");
+        String title = "NotifyMe ["+ service +"]";
 
         mNotificationManager = (NotificationManager)
                 this.getSystemService(Context.NOTIFICATION_SERVICE);
 
         PendingIntent contentIntent;
-        if(type.equals("Reddit")) {
+        if(service.equals("Reddit")) {
             Intent resultIntent = new Intent(Intent.ACTION_VIEW);
-            String url;
-            if(Integer.parseInt(extras.getString("count")) == 1) {
-                try {
-                    JSONArray posts = new JSONArray(extras.getString("links"));
-                    url = posts.getJSONObject(0).getString("url");
-                    message = posts.getJSONObject(0).getString("title");
-                } catch (JSONException e) {
+            String url = "http://reddit.com";
+            if(type.equals("reddit-front-page")) {
+                if(Integer.parseInt(extras.getString("count")) == 1) {
+                    try {
+                        JSONArray posts = new JSONArray(extras.getString("links"));
+                        url = posts.getJSONObject(0).getString("url");
+                        message = posts.getJSONObject(0).getString("title");
+                    } catch (JSONException e) {
+                        url = "http://reddit.com";
+                    }
+                } else {
                     url = "http://reddit.com";
                 }
-            } else {
-                url = "http://reddit.com";
+            } else if(type.equals("user-comment") || type.equals("user-submission")) {
+                url = extras.getString("link");
             }
             resultIntent.setData(Uri.parse(url));
             contentIntent = PendingIntent.getActivity(this, 0, resultIntent, Intent.FLAG_ACTIVITY_NEW_TASK);
-        } else if(type.equals("weather")) {
+        } else if(service.equals("weather")) {
             Intent resultIntent;
             Intent weatherIntent = getWeatherAppIntent();
             if(weatherIntent != null) {
@@ -150,7 +155,7 @@ public class GcmIntentService extends IntentService {
                 resultIntent.setData(Uri.parse(url));
             }
             contentIntent = PendingIntent.getActivity(this, 0, resultIntent, Intent.FLAG_ACTIVITY_NEW_TASK);
-        } else if(type.equals("poly")) {
+        } else if(service.equals("poly")) {
             Intent resultIntent = new Intent(Intent.ACTION_VIEW);
             String url = "https://www4.polymtl.ca/poly/poly.html";
             resultIntent.setData(Uri.parse(url));
