@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -204,7 +205,16 @@ public class MainActivity extends Activity {
                     }
                 }.execute(null, null, null);
             }
-
+        } else if (view == findViewById(R.id.addNewBtn)) {
+            Intent intent = new Intent(context, ServicesViewer.class);
+            startActivity(intent);
+//            Intent intent = new Intent(context, WebViewer.class);
+//            intent.setData(Uri.parse("http://notifyme.cloudapp.net/services/weather"));
+//            startActivity(intent);
+        } else if (view == findViewById(R.id.myNotificationsBtn)) {
+            mDisplay.setText("");
+        } else if (view == findViewById(R.id.logBtn)) {
+            mDisplay.setText("");
         } else if (view == findViewById(R.id.clear)) {
             mDisplay.setText("");
         } else if (view == findViewById(R.id.clearData)) {

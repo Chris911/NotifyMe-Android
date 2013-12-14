@@ -79,9 +79,7 @@ public class GcmIntentService extends IntentService {
                 String service = extras.getString("service");
                 if(service.equals("NotifyMe")) {
                     sendNotification(extras.getString("message"));
-                } else if(service.equals("Reddit") ||
-                          service.equals("weather")||
-                          service.equals("poly")) {
+                } else {
                     sendNotificationWithExtras(extras);
                 }
 
@@ -158,6 +156,11 @@ public class GcmIntentService extends IntentService {
         } else if(service.equals("poly")) {
             Intent resultIntent = new Intent(Intent.ACTION_VIEW);
             String url = "https://www4.polymtl.ca/poly/poly.html";
+            resultIntent.setData(Uri.parse(url));
+            contentIntent = PendingIntent.getActivity(this, 0, resultIntent, Intent.FLAG_ACTIVITY_NEW_TASK);
+        } else if(service.equals("github")) {
+            Intent resultIntent = new Intent(Intent.ACTION_VIEW);
+            String url = extras.getString("link");
             resultIntent.setData(Uri.parse(url));
             contentIntent = PendingIntent.getActivity(this, 0, resultIntent, Intent.FLAG_ACTIVITY_NEW_TASK);
         } else {

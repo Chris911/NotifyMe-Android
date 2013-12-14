@@ -39,5 +39,8 @@
 
         <activity android:name=".auth.SignInActivity">
         </activity>
+        <activity android:name=".WebViewer"/>
+        <activity android:name=".ServicesViewer"/>
+        <activity android:name=".ServicesViewer"/>
     </application>
 </manifest>
