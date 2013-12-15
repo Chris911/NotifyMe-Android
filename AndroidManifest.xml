@@ -42,5 +42,6 @@
         <activity android:name=".WebViewer"/>
         <activity android:name=".ServicesViewer"/>
         <activity android:name=".ServicesViewer"/>
+        <activity android:name=".NotificationViewer"/>
     </application>
 </manifest>

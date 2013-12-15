@@ -41,8 +41,9 @@ public class MainActivity extends Activity {
 
     public static final int VALID_SIGN_IN_RESULT = 8000;
 
-    private final static String NOTIFYME_API_URL = "http://notifyme.cloudapp.net/api/";
-    private final static String DEVICE_ENDPOINT  = "device/register";
+    public final static String NOTIFYME_API_URL = "http://notifyme.cloudapp.net/api/";
+    public final static String DEVICE_ENDPOINT  = "device/register";
+    public final static String NOTIF_LIST_ENDPOINT  = "notification/list";
 
     /**
      * Google Project ID for API access to GCM
@@ -212,7 +213,13 @@ public class MainActivity extends Activity {
 //            intent.setData(Uri.parse("http://notifyme.cloudapp.net/services/weather"));
 //            startActivity(intent);
         } else if (view == findViewById(R.id.myNotificationsBtn)) {
-            mDisplay.setText("");
+            if(getUserFullname().isEmpty()) {
+                show("You need to sign in first\n");
+            } else {
+                Intent intent = new Intent(context, NotificationViewer.class);
+                intent.putExtra("UID", getUserGoogleUID());
+                startActivity(intent);
+            }
         } else if (view == findViewById(R.id.logBtn)) {
             mDisplay.setText("");
         } else if (view == findViewById(R.id.clear)) {
