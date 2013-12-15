@@ -38,7 +38,7 @@ public class ServicesViewer extends Activity {
         setContentView(R.layout.services_viewer);
 
         ServicesList adapter = new ServicesList(ServicesViewer.this, services, imageId);
-        list=(ListView)findViewById(R.id.list);
+        list = (ListView)findViewById(R.id.list);
         list.setAdapter(adapter);
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -48,7 +48,5 @@ public class ServicesViewer extends Activity {
                 startActivity(intent);
             }
         });
-
-
     }
 }
