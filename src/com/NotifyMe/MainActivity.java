@@ -6,7 +6,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
@@ -44,6 +43,7 @@ public class MainActivity extends Activity {
     public final static String NOTIFYME_API_URL = "http://notifyme.cloudapp.net/api/";
     public final static String DEVICE_ENDPOINT  = "device/register";
     public final static String NOTIF_LIST_ENDPOINT  = "notification/list";
+    public final static String LOG_LIST_ENDPOINT  = "log/list";
 
     /**
      * Google Project ID for API access to GCM
@@ -221,7 +221,13 @@ public class MainActivity extends Activity {
                 startActivity(intent);
             }
         } else if (view == findViewById(R.id.logBtn)) {
-            mDisplay.setText("");
+            if(getUserFullname().isEmpty()) {
+                show("You need to sign in first\n");
+            } else {
+                Intent intent = new Intent(context, LogsViewer.class);
+                intent.putExtra("UID", getUserGoogleUID());
+                startActivity(intent);
+            }
         } else if (view == findViewById(R.id.clear)) {
             mDisplay.setText("");
         } else if (view == findViewById(R.id.clearData)) {

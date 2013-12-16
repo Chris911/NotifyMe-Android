@@ -43,5 +43,6 @@
         <activity android:name=".ServicesViewer"/>
         <activity android:name=".ServicesViewer"/>
         <activity android:name=".NotificationViewer"/>
+        <activity android:name=".LogsViewer"/>
     </application>
 </manifest>

@@ -1,4 +1,4 @@
-package com.NotifyMe.Utilities;
+package com.NotifyMe.Lists;
 
 import android.app.Activity;
 import android.view.LayoutInflater;

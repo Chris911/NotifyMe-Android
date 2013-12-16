@@ -8,8 +8,11 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
+import com.NotifyMe.Lists.LogsList;
+import com.NotifyMe.Utilities.APIResponse;
+import com.NotifyMe.Utilities.JSONUtilities;
 import com.NotifyMe.Lists.NotificationsList;
-import com.NotifyMe.Utilities.*;
+import com.NotifyMe.Utilities.ServerUtilities;
 import org.apache.http.message.BasicNameValuePair;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -17,10 +20,10 @@ import org.json.JSONException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class NotificationViewer extends Activity {
+public class LogsViewer extends Activity {
     ListView list;
     Context context;
-    String[] notifications;
+    String[] logs;
 
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -31,16 +34,16 @@ public class NotificationViewer extends Activity {
         new AsyncTask<Void, Void, String>() {
             @Override
             protected String doInBackground(Void... params) {
-                notifications = getNotifications(getIntent().getExtras().getString("UID"));
+                logs = getLogs(getIntent().getExtras().getString("UID"));
                 return  null;
             }
 
             @Override
             protected void onPostExecute(String msg) {
-                if(notifications == null)
+                if(logs == null)
                     return;
-
-                NotificationsList adapter = new NotificationsList(NotificationViewer.this, notifications);
+                
+                LogsList adapter = new LogsList(LogsViewer.this, logs);
                 list = (ListView)findViewById(R.id.list);
                 list.setAdapter(adapter);
                 list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -55,15 +58,15 @@ public class NotificationViewer extends Activity {
         }.execute(null, null, null);
     }
 
-    private String[] getNotifications(String uid) {
+    private String[] getLogs(String uid) {
         List<BasicNameValuePair> params = new ArrayList<BasicNameValuePair>();
         params.add(new BasicNameValuePair("uid", uid));
-        APIResponse response = ServerUtilities.post(MainActivity.NOTIFYME_API_URL + MainActivity.NOTIF_LIST_ENDPOINT, params);
+        APIResponse response = ServerUtilities.post(MainActivity.NOTIFYME_API_URL + MainActivity.LOG_LIST_ENDPOINT, params);
         if(response.APISuccess) {
             try {
-                JSONArray notifications = response.jsonResponse.getJSONArray("notifications");
-                ArrayList<String> notifications_list = JSONUtilities.jsonArrayToList(notifications);
-                return notifications_list.toArray(new String[notifications_list.size()]);
+                JSONArray logs = response.jsonResponse.getJSONArray("logs");
+                ArrayList<String> logs_list = JSONUtilities.jsonArrayToList(logs);
+                return logs_list.toArray(new String[logs_list.size()]);
             } catch (JSONException e) {
                 showErrorNotif();
             }
@@ -77,7 +80,7 @@ public class NotificationViewer extends Activity {
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                Toast.makeText(context, "Error loading notifications", Toast.LENGTH_LONG).show();
+                Toast.makeText(context, "Error loading logs", Toast.LENGTH_LONG).show();
             }
         });
     }

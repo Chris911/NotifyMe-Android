@@ -7,7 +7,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import com.NotifyMe.Utilities.ServicesList;
+import com.NotifyMe.Lists.ServicesList;
 
 public class ServicesViewer extends Activity {
     ListView list;
